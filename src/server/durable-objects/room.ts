@@ -573,6 +573,15 @@ export class RoomDurableObject extends DurableObject<Env> {
 			`DELETE FROM round_history WHERE round_number = ?`,
 			roundNumber,
 		);
+		this.ctx.storage.sql.exec(
+			`UPDATE room
+			 SET round_number = COALESCE(
+				(SELECT MAX(round_number) + 1 FROM round_history),
+				1
+			 )
+			 WHERE id = ?`,
+			room.id,
+		);
 		this.touchActivity();
 		console.log(
 			JSON.stringify({
@@ -589,6 +598,10 @@ export class RoomDurableObject extends DurableObject<Env> {
 			return;
 		}
 		this.ctx.storage.sql.exec(`DELETE FROM round_history`);
+		this.ctx.storage.sql.exec(
+			`UPDATE room SET round_number = 1 WHERE id = ?`,
+			room.id,
+		);
 		this.touchActivity();
 		console.log(
 			JSON.stringify({

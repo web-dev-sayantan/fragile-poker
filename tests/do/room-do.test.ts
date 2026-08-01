@@ -190,6 +190,20 @@ describe("RoomDurableObject", () => {
 		expect(afterReset.participants.every((p) => !p.hasVoted)).toBe(true);
 		expect(afterReset.history).toHaveLength(1);
 
+		const afterDelete = waitForState(
+			alice,
+			(s) => s.roundNumber === 1 && s.history.length === 0,
+		);
+		send(alice, { type: "deleteRound", roundNumber: 1 });
+		await afterDelete;
+
+		const afterClear = waitForState(
+			alice,
+			(s) => s.roundNumber === 1 && s.history.length === 0,
+		);
+		send(alice, { type: "clearHistory" });
+		await afterClear;
+
 		alice.close(1000, "done");
 		bob.close(1000, "done");
 	});
