@@ -1,0 +1,5 @@
+{
+  "database": "sqlite",
+  "databaseUrl": "libsql://cricket-247-ishanz23.aws-ap-south-1.turso.io",
+  "token": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicm8iLCJleHAiOjE3NzQyMzYwNTEsImlhdCI6MTc3NDA2MzI1MSwiaWQiOiI0OTI4OTc3ZC1hNTMzLTRlM2MtYjVkYy1mNzQzMDc3ZTlhNDEiLCJyaWQiOiI1YjRhMDU2Ny1lMDc4LTRmZTQtOGM0YS1jNWJhODdhNjg2ODEifQ.ZCmy2XlSg49K2giWi2wwkG1MlC6Jz2a_tD4nwiAfR7DJ1ZgLW46wpBMFArKB1mkLsd7WZzu5LDQW0JF7u733AA"
+}
