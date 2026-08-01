@@ -1,8 +1,12 @@
-import { createSignal, For, Show } from "solid-js";
+import { createEffect, createSignal, For, Show } from "solid-js";
+import { Button } from "~/components/ui/button";
+import { Trash2Icon, TrashIcon } from "~/components/ui/icons/trash-icon";
 import type { HistoryEntry } from "~/lib/room-protocol";
 
 type Props = {
 	history: HistoryEntry[];
+	onDeleteRound: (roundNumber: number) => void;
+	onClearHistory: () => void;
 };
 
 function formatStat(value: number | null): string {
@@ -14,6 +18,44 @@ function formatStat(value: number | null): string {
 
 export function RoundHistory(props: Props) {
 	const [open, setOpen] = createSignal(false);
+	const [confirmAction, setConfirmAction] = createSignal<{
+		type: "deleteRound" | "clearHistory";
+		roundNumber?: number;
+	} | null>(null);
+	let lastFocused: HTMLElement | null = null;
+
+	const handleDeleteRound = (roundNumber: number) => {
+		if (document.activeElement instanceof HTMLElement) {
+			lastFocused = document.activeElement;
+		}
+		setConfirmAction({ type: "deleteRound", roundNumber });
+	};
+
+	const handleClearHistory = () => {
+		if (document.activeElement instanceof HTMLElement) {
+			lastFocused = document.activeElement;
+		}
+		setConfirmAction({ type: "clearHistory" });
+	};
+
+	const closeConfirm = () => {
+		setConfirmAction(null);
+		lastFocused?.focus();
+		lastFocused = null;
+	};
+
+	const confirmDelete = () => {
+		const action = confirmAction();
+		if (!action) return;
+		if (action.type === "deleteRound") {
+			if (action.roundNumber != null) {
+				props.onDeleteRound(action.roundNumber);
+			}
+		} else {
+			props.onClearHistory();
+		}
+		closeConfirm();
+	};
 
 	return (
 		<section class="border-t border-border pt-1">
@@ -49,13 +91,24 @@ export function RoundHistory(props: Props) {
 											<span class="font-medium tracking-tight text-foreground">
 												Round {entry.roundNumber}
 											</span>
-											<span class="text-xs tabular-nums text-muted-foreground">
-												avg {formatStat(entry.average)}
-												<span class="mx-1.5 text-border" aria-hidden="true">
-													·
+											<div class="flex items-center gap-1">
+												<span class="text-xs tabular-nums text-muted-foreground">
+													avg {formatStat(entry.average)}
+													<span class="mx-1.5 text-border" aria-hidden="true">
+														·
+													</span>
+													median {formatStat(entry.median)}
 												</span>
-												median {formatStat(entry.median)}
-											</span>
+												<Button
+													variant="ghost"
+													size="icon"
+													class="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+													aria-label={`Delete round ${entry.roundNumber}`}
+													onClick={() => handleDeleteRound(entry.roundNumber)}
+												>
+													<TrashIcon />
+												</Button>
+											</div>
 										</div>
 										<p class="text-xs leading-relaxed text-muted-foreground">
 											{entry.results
@@ -66,8 +119,69 @@ export function RoundHistory(props: Props) {
 								)}
 							</For>
 						</ul>
+						<div class="pt-2 border-t border-border">
+							<Button
+								variant="ghost"
+								size="sm"
+								class="w-full text-destructive hover:bg-destructive/10"
+								onClick={handleClearHistory}
+							>
+								<Trash2Icon />
+								<span>Clear all history</span>
+							</Button>
+						</div>
 					</Show>
 				</div>
+			</Show>
+
+			<Show when={confirmAction()}>
+				{(actionAccessor) => {
+					const action = actionAccessor();
+					let dialogRef: HTMLDialogElement | undefined;
+					createEffect(() => {
+						dialogRef?.showModal();
+					});
+					return (
+						<dialog
+							ref={dialogRef}
+							class="fixed left-1/2 top-1/2 m-0 max-h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border-none bg-background p-6 shadow-lg backdrop:bg-black/50"
+							aria-labelledby="confirm-dialog-title"
+							onClick={(e) => {
+								if (e.target === dialogRef) {
+									closeConfirm();
+								}
+							}}
+							onKeyDown={(e) => {
+								if (e.key === "Escape") {
+									e.preventDefault();
+									closeConfirm();
+								}
+							}}
+						>
+							<h3
+								id="confirm-dialog-title"
+								class="text-lg font-semibold text-foreground"
+							>
+								{action.type === "deleteRound"
+									? `Delete round ${action.roundNumber}?`
+									: "Clear all history?"}
+							</h3>
+							<p class="mt-2 text-sm text-muted-foreground">
+								{action.type === "deleteRound"
+									? "This will permanently remove this round from history. This action cannot be undone."
+									: "This will permanently remove all rounds from history. This action cannot be undone."}
+							</p>
+							<div class="mt-4 flex justify-end gap-2">
+								<Button variant="ghost" size="sm" onClick={closeConfirm}>
+									Cancel
+								</Button>
+								<Button variant="danger" size="sm" onClick={confirmDelete}>
+									{action.type === "deleteRound" ? "Delete" : "Clear all"}
+								</Button>
+							</div>
+						</dialog>
+					);
+				}}
 			</Show>
 		</section>
 	);

@@ -108,6 +108,15 @@ export const leaveMessageSchema = z.object({
 	type: z.literal("leave"),
 });
 
+export const deleteRoundMessageSchema = z.object({
+	type: z.literal("deleteRound"),
+	roundNumber: z.number().int().positive(),
+});
+
+export const clearHistoryMessageSchema = z.object({
+	type: z.literal("clearHistory"),
+});
+
 export const clientMessageSchema = z.discriminatedUnion("type", [
 	joinMessageSchema,
 	renameMessageSchema,
@@ -115,8 +124,13 @@ export const clientMessageSchema = z.discriminatedUnion("type", [
 	voteMessageSchema,
 	revealMessageSchema,
 	resetMessageSchema,
+	deleteRoundMessageSchema,
+	clearHistoryMessageSchema,
 	leaveMessageSchema,
 ]);
+
+export type DeleteRoundMessage = z.infer<typeof deleteRoundMessageSchema>;
+export type ClearHistoryMessage = z.infer<typeof clearHistoryMessageSchema>;
 
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
 export type JoinMessage = z.infer<typeof joinMessageSchema>;

@@ -219,7 +219,11 @@ function RoomSession(props: {
 							/>
 						</Show>
 
-						<RoundHistory history={snapshot().history} />
+						<RoundHistory
+							history={snapshot().history}
+							onDeleteRound={(roundNumber) => connection.deleteRound(roundNumber)}
+							onClearHistory={() => connection.clearHistory()}
+						/>
 					</div>
 				)}
 			</Show>

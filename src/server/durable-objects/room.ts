@@ -344,6 +344,12 @@ export class RoomDurableObject extends DurableObject<Env> {
 			case "reset":
 				this.handleReset();
 				break;
+			case "deleteRound":
+				this.handleDeleteRound(message.roundNumber);
+				break;
+			case "clearHistory":
+				this.handleClearHistory();
+				break;
 			case "leave":
 				ws.close(1000, "Left room");
 				return;
@@ -554,6 +560,40 @@ export class RoomDurableObject extends DurableObject<Env> {
 				event: "reset",
 				roomIdHash: hashId(room.id),
 				fromRound: room.round_number,
+			}),
+		);
+	}
+
+	private handleDeleteRound(roundNumber: number): void {
+		const room = this.getRoomRow();
+		if (!room) {
+			return;
+		}
+		this.ctx.storage.sql.exec(
+			`DELETE FROM round_history WHERE round_number = ?`,
+			roundNumber,
+		);
+		this.touchActivity();
+		console.log(
+			JSON.stringify({
+				event: "delete_round",
+				roomIdHash: hashId(room.id),
+				roundNumber,
+			}),
+		);
+	}
+
+	private handleClearHistory(): void {
+		const room = this.getRoomRow();
+		if (!room) {
+			return;
+		}
+		this.ctx.storage.sql.exec(`DELETE FROM round_history`);
+		this.touchActivity();
+		console.log(
+			JSON.stringify({
+				event: "clear_history",
+				roomIdHash: hashId(room.id),
 			}),
 		);
 	}

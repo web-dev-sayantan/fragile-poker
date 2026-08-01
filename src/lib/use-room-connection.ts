@@ -24,6 +24,8 @@ export type RoomConnection = {
 	renameRoom: (roomName: string) => void;
 	leave: () => void;
 	join: (name: string) => void;
+	deleteRound: (roundNumber: number) => void;
+	clearHistory: () => void;
 };
 
 const MAX_BACKOFF_MS = 10_000;
@@ -226,5 +228,7 @@ export function useRoomConnection(roomId: () => string): RoomConnection {
 			}
 			connect();
 		},
+		deleteRound: (roundNumber: number) => send({ type: "deleteRound", roundNumber }),
+		clearHistory: () => send({ type: "clearHistory" }),
 	};
 }
