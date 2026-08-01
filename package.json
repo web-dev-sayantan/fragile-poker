@@ -30,6 +30,7 @@
 		"@tanstack/solid-start": "latest",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
+		"lucide-solid": "^1.28.0",
 		"nanoid": "^6.0.0",
 		"solid-js": "^1.9.12",
 		"tailwind-merge": "^3.0.2",

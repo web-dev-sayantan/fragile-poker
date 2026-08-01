@@ -136,6 +136,7 @@ function RoomSession(props: {
 				status={connection.status()}
 				shareUrl={shareUrl()}
 				onRenameRoom={(roomName) => connection.renameRoom(roomName)}
+				onLeave={() => connection.leave()}
 			/>
 
 			<div class="sr-only" aria-live="polite" aria-atomic="true">
@@ -221,7 +222,9 @@ function RoomSession(props: {
 
 						<RoundHistory
 							history={snapshot().history}
-							onDeleteRound={(roundNumber) => connection.deleteRound(roundNumber)}
+							onDeleteRound={(roundNumber) =>
+								connection.deleteRound(roundNumber)
+							}
 							onClearHistory={() => connection.clearHistory()}
 						/>
 					</div>

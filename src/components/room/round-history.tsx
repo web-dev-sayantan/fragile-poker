@@ -1,6 +1,6 @@
+import { Trash, Trash2 } from "lucide-solid";
 import { createEffect, createSignal, For, Show } from "solid-js";
 import { Button } from "~/components/ui/button";
-import { Trash2Icon, TrashIcon } from "~/components/ui/icons/trash-icon";
 import type { HistoryEntry } from "~/lib/room-protocol";
 
 type Props = {
@@ -106,7 +106,11 @@ export function RoundHistory(props: Props) {
 													aria-label={`Delete round ${entry.roundNumber}`}
 													onClick={() => handleDeleteRound(entry.roundNumber)}
 												>
-													<TrashIcon />
+													<Trash
+														size={16}
+														strokeWidth={1.75}
+														aria-hidden="true"
+													/>
 												</Button>
 											</div>
 										</div>
@@ -126,7 +130,7 @@ export function RoundHistory(props: Props) {
 								class="w-full text-destructive hover:bg-destructive/10"
 								onClick={handleClearHistory}
 							>
-								<Trash2Icon />
+								<Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
 								<span>Clear all history</span>
 							</Button>
 						</div>

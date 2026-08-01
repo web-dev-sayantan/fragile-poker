@@ -1,3 +1,4 @@
+import { Check, Pencil, X } from "lucide-solid";
 import { createSignal, Show } from "solid-js";
 import { Button } from "~/components/ui/button";
 import { CopyLinkButton } from "~/components/ui/copy-link-button";
@@ -16,6 +17,7 @@ type Props = {
 	status: ConnectionStatus;
 	shareUrl: string;
 	onRenameRoom: (roomName: string) => void;
+	onLeave: () => void;
 };
 
 function statusLabel(status: ConnectionStatus): string {
@@ -54,6 +56,7 @@ export function RoomHeader(props: Props) {
 	const [editing, setEditing] = createSignal(false);
 	const [draftName, setDraftName] = createSignal(props.roomName);
 	const [nameError, setNameError] = createSignal<string | null>(null);
+	const [confirmingLeave, setConfirmingLeave] = createSignal(false);
 
 	const saveRoomName = () => {
 		const result = roomNameSchema.safeParse(draftName());
@@ -89,21 +92,7 @@ export function RoomHeader(props: Props) {
 										setEditing(true);
 									}}
 								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="16"
-										height="16"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="1.75"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										aria-hidden="true"
-									>
-										<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
-										<path d="m15 5 4 4" />
-									</svg>
+									<Pencil size={16} strokeWidth={1.75} aria-hidden="true" />
 								</Button>
 							</div>
 						}
@@ -166,6 +155,41 @@ export function RoomHeader(props: Props) {
 						<span>{statusLabel(props.status)}</span>
 					</div>
 					<CopyLinkButton url={props.shareUrl} />
+					<Show
+						when={confirmingLeave()}
+						fallback={
+							<Button
+								variant="ghost"
+								size="sm"
+								class="text-destructive hover:text-destructive"
+								onClick={() => setConfirmingLeave(true)}
+							>
+								Leave room
+							</Button>
+						}
+					>
+						<div class="flex items-center gap-1">
+							<Button
+								variant="ghost"
+								size="icon"
+								class="text-success hover:text-success"
+								aria-label="Sure, leave room"
+								title="Sure, leave room"
+								onClick={() => props.onLeave()}
+							>
+								<Check size={16} strokeWidth={1.75} aria-hidden="true" />
+							</Button>
+							<Button
+								variant="ghost"
+								size="icon"
+								aria-label="Cancel leaving room"
+								title="Cancel"
+								onClick={() => setConfirmingLeave(false)}
+							>
+								<X size={16} strokeWidth={1.75} aria-hidden="true" />
+							</Button>
+						</div>
+					</Show>
 				</div>
 			</div>
 		</header>

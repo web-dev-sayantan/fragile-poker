@@ -351,7 +351,10 @@ export class RoomDurableObject extends DurableObject<Env> {
 				this.handleClearHistory();
 				break;
 			case "leave":
-				ws.close(1000, "Left room");
+				this.handleLeave(participantId);
+				this.touchActivity();
+				this.broadcastState();
+				this.closeParticipantSockets(participantId);
 				return;
 			default:
 				this.sendError(ws, "INVALID_MESSAGE", "Unsupported message type");
@@ -609,6 +612,33 @@ export class RoomDurableObject extends DurableObject<Env> {
 				roomIdHash: hashId(room.id),
 			}),
 		);
+	}
+
+	private handleLeave(participantId: string): void {
+		this.ctx.storage.sql.exec(
+			`DELETE FROM participant WHERE id = ?`,
+			participantId,
+		);
+		console.log(
+			JSON.stringify({
+				event: "leave",
+				roomIdHash: hashId(this.getRoomRow()?.id ?? "unknown"),
+				participantIdHash: hashId(participantId),
+			}),
+		);
+	}
+
+	private closeParticipantSockets(participantId: string): void {
+		for (const socket of this.ctx.getWebSockets()) {
+			if (this.getAttachment(socket).participantId !== participantId) {
+				continue;
+			}
+			try {
+				socket.close(1000, "Left room");
+			} catch {
+				// already closed
+			}
+		}
 	}
 
 	private broadcastState(): void {

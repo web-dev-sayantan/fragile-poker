@@ -247,6 +247,60 @@ describe("RoomDurableObject", () => {
 		tab2.close(1000, "done");
 	});
 
+	it("removes an unrevealed vote when its participant leaves", async () => {
+		const roomId = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+		const stub = roomStub(roomId);
+		await stub.createRoom(roomId, "Leave room", "fibonacci");
+
+		const alice = await openSocket(roomId);
+		const bob = await openSocket(roomId);
+
+		const aliceJoined = waitForState(
+			alice,
+			(state) => state.participants.length === 1,
+		);
+		send(alice, {
+			type: "join",
+			participantId: "alice-participant",
+			name: "Alice",
+		});
+		await aliceJoined;
+
+		const bobJoined = waitForState(
+			bob,
+			(state) => state.participants.length === 2,
+		);
+		send(bob, {
+			type: "join",
+			participantId: "bob-participantxx",
+			name: "Bob",
+		});
+		await bobJoined;
+
+		const bobVoted = waitForState(bob, (state) => state.selfVote === "8");
+		send(bob, { type: "vote", value: "8" });
+		await bobVoted;
+
+		const aliceSawBobLeave = waitForState(
+			alice,
+			(state) =>
+				state.participants.length === 1 &&
+				state.participants[0]?.id === "alice-participant",
+		);
+		send(bob, { type: "leave" });
+		const afterLeave = await aliceSawBobLeave;
+		expect(afterLeave.selfVote).toBeUndefined();
+
+		const revealed = waitForState(alice, (state) => state.revealed);
+		send(alice, { type: "reveal" });
+		const afterReveal = await revealed;
+		expect(afterReveal.history[0]?.results).toEqual([]);
+		expect(afterReveal.history[0]?.average).toBeNull();
+		expect(afterReveal.history[0]?.median).toBeNull();
+
+		alice.close(1000, "done");
+	});
+
 	it("cleans up inactive rooms via alarm", async () => {
 		const roomId = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
 		const stub = roomStub(roomId);
