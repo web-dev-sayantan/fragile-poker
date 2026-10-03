@@ -1,4 +1,4 @@
-import { Check, Pencil, X } from "lucide-solid";
+import { Check, LogOut, Pencil, X } from "lucide-solid";
 import { createSignal, Show } from "solid-js";
 import { Button } from "~/components/ui/button";
 import { CopyLinkButton } from "~/components/ui/copy-link-button";
@@ -160,11 +160,13 @@ export function RoomHeader(props: Props) {
 						fallback={
 							<Button
 								variant="ghost"
-								size="sm"
+								size="icon"
 								class="text-destructive hover:text-destructive"
+								aria-label="Leave room"
+								title="Leave room"
 								onClick={() => setConfirmingLeave(true)}
 							>
-								Leave room
+								<LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
 							</Button>
 						}
 					>

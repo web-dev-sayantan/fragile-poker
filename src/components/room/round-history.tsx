@@ -1,4 +1,4 @@
-import { Trash, Trash2 } from "lucide-solid";
+import { ChevronDown, Trash, Trash2 } from "lucide-solid";
 import { createEffect, createSignal, For, Show } from "solid-js";
 import { Button } from "~/components/ui/button";
 import type { HistoryEntry } from "~/lib/room-protocol";
@@ -68,9 +68,14 @@ export function RoundHistory(props: Props) {
 				<span class="text-sm font-medium tracking-tight text-foreground">
 					Round history ({props.history.length})
 				</span>
-				<span class="text-xs text-muted-foreground">
-					{open() ? "Hide" : "Show"}
-				</span>
+				<ChevronDown
+					size={16}
+					strokeWidth={1.75}
+					aria-hidden="true"
+					class={`shrink-0 text-muted-foreground transition-transform duration-150 ${
+						open() ? "rotate-180" : ""
+					}`}
+				/>
 			</button>
 
 			<Show when={open()}>

@@ -1,3 +1,4 @@
+import { Check, Copy } from "lucide-solid";
 import { createSignal, onCleanup, Show } from "solid-js";
 import { Button } from "./button";
 
@@ -44,13 +45,22 @@ export function CopyLinkButton(props: Props) {
 	return (
 		<Button
 			variant="secondary"
-			size="sm"
+			size="icon"
 			class={props.class}
 			onClick={() => void copy()}
-			aria-live="polite"
+			aria-label={copied() ? "Link copied" : "Copy room link"}
+			title={copied() ? "Copied" : "Copy link"}
 		>
-			<Show when={copied()} fallback={<span>Copy link</span>}>
-				<span>Copied</span>
+			<Show
+				when={copied()}
+				fallback={<Copy size={16} strokeWidth={1.75} aria-hidden="true" />}
+			>
+				<Check
+					size={16}
+					strokeWidth={1.75}
+					class="text-success"
+					aria-hidden="true"
+				/>
 			</Show>
 		</Button>
 	);
